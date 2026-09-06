@@ -1,6 +1,7 @@
 create type material_type as enum ('pdf', 'youtube', 'note');
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
+  username text unique not null default '',
   full_name text not null default '',
   college text not null default '',
   branch text not null default '',
@@ -42,3 +43,39 @@ create policy "Users manage bookmarks" on public.bookmarks for all using (auth.u
 create policy "Users manage votes" on public.votes for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "Users create reports" on public.reports for insert with check (auth.uid() = reporter_id);
 insert into storage.buckets (id, name, public) values ('materials', 'materials', true) on conflict do nothing;
+
+-- Keep profiles in sync with every auth provider, including Google.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  base_username text;
+begin
+  base_username := lower(regexp_replace(coalesce(new.raw_user_meta_data->>'user_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1), 'student'), '[^a-zA-Z0-9_]+', '', 'g'));
+  if base_username = '' then base_username := 'student'; end if;
+  insert into public.profiles (id, username, full_name, avatar_url)
+  values (
+    new.id,
+    left(base_username, 36) || '_' || right(replace(new.id::text, '-', ''), 6),
+    coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1), 'Student'),
+    new.raw_user_meta_data->>'avatar_url'
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- Migration for projects that ran the first version of this schema.
+alter table public.profiles add column if not exists username text;
+update public.profiles
+set username = 'student_' || right(replace(id::text, '-', ''), 6)
+where username is null or username = '';
+alter table public.profiles alter column username set not null;
+create unique index if not exists profiles_username_key on public.profiles (username);

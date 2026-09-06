@@ -16,6 +16,7 @@ const features = [
 
 function AuthModal({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [resetMode, setResetMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -46,6 +47,14 @@ function AuthModal({ onClose }: { onClose: () => void }) {
     if (error) setMessage(error.message);
   }
 
+  async function sendResetEmail() {
+    setBusy(true);
+    setMessage("");
+    const { error } = await createClient().auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/reset-password` });
+    setMessage(error ? error.message : "Password reset link sent. Check your email.");
+    setBusy(false);
+  }
+
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4 backdrop-blur-sm">
       <div className="relative w-full max-w-md rounded-[2rem] bg-white p-7 shadow-2xl">
@@ -59,10 +68,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
         <div className="my-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-slate-400"><span className="h-px flex-1 bg-slate-200" />or email<span className="h-px flex-1 bg-slate-200" /></div>
         <label className="mb-1 block text-sm font-semibold text-slate-700">Email address</label>
         <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" placeholder="you@college.edu" className="mb-4 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none ring-indigo-500 focus:ring-2" />
-        <label className="mb-1 block text-sm font-semibold text-slate-700">Password</label>
+        {!resetMode && <><label className="mb-1 block text-sm font-semibold text-slate-700">Password</label>
         <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" placeholder="At least 8 characters" className="mb-5 h-12 w-full rounded-xl border border-slate-200 px-4 outline-none ring-indigo-500 focus:ring-2" />
         <button disabled={busy} onClick={submit} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60">{busy ? "Working..." : mode === "login" ? "Enter Drive" : "Create account"} <ArrowRight size={17} /></button>
-        <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="mt-4 w-full text-center text-sm font-semibold text-indigo-600">{mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}</button>
+        {mode === "login" && <button onClick={() => setResetMode(true)} className="mt-4 w-full text-center text-sm font-semibold text-slate-500 hover:text-indigo-600">Forgot your password?</button>}
+        <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="mt-4 w-full text-center text-sm font-semibold text-indigo-600">{mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}</button></>}
+        {resetMode && <><p className="mb-4 text-sm text-slate-500">Enter your email and we&apos;ll send you a secure password reset link.</p><button disabled={busy} onClick={sendResetEmail} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 font-semibold text-white disabled:opacity-60">{busy ? "Sending..." : "Send reset link"} <ArrowRight size={17} /></button><button onClick={() => setResetMode(false)} className="mt-4 w-full text-center text-sm font-semibold text-indigo-600">Back to login</button></>}
         {message && <p className="mt-4 rounded-lg bg-slate-50 p-3 text-center text-sm text-slate-600">{message}</p>}
         <p className="mt-5 text-center text-xs text-slate-400">By continuing, you agree to our community guidelines.</p>
       </div>
