@@ -6,7 +6,6 @@ create table public.profiles (
   college text not null default '',
   branch text not null default '',
   semester int check (semester between 1 and 12),
-  is_public boolean not null default true,
   avatar_url text,
   created_at timestamptz not null default now()
 );
@@ -23,6 +22,7 @@ create table public.materials (
   external_url text,
   content text,
   thumbnail_url text,
+  is_public boolean not null default true,
   views int not null default 0,
   downloads int not null default 0,
   created_at timestamptz not null default now()
