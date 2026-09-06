@@ -44,6 +44,10 @@ create policy "Users manage bookmarks" on public.bookmarks for all using (auth.u
 create policy "Users manage votes" on public.votes for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "Users create reports" on public.reports for insert with check (auth.uid() = reporter_id);
 insert into storage.buckets (id, name, public) values ('materials', 'materials', true) on conflict do nothing;
+drop policy if exists "Users upload materials" on storage.objects;
+create policy "Users upload materials" on storage.objects for insert to authenticated with check (bucket_id = 'materials' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "Users manage own material files" on storage.objects;
+create policy "Users manage own material files" on storage.objects for all to authenticated using (bucket_id = 'materials' and (storage.foldername(name))[1] = auth.uid()::text) with check (bucket_id = 'materials' and (storage.foldername(name))[1] = auth.uid()::text);
 
 -- Keep profiles in sync with every auth provider, including Google.
 create or replace function public.handle_new_user()
