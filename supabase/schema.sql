@@ -6,6 +6,7 @@ create table public.profiles (
   college text not null default '',
   branch text not null default '',
   semester int check (semester between 1 and 12),
+  is_public boolean not null default true,
   avatar_url text,
   created_at timestamptz not null default now()
 );
@@ -33,7 +34,7 @@ create table public.reports (id uuid primary key default gen_random_uuid(), mate
 alter table public.profiles enable row level security; alter table public.materials enable row level security; alter table public.comments enable row level security; alter table public.bookmarks enable row level security; alter table public.votes enable row level security; alter table public.reports enable row level security;
 create policy "Profiles are public" on public.profiles for select using (true);
 create policy "Users edit own profile" on public.profiles for all using (auth.uid() = id) with check (auth.uid() = id);
-create policy "Materials are public" on public.materials for select using (true);
+create policy "Public materials are visible" on public.materials for select using (is_public = true or auth.uid() = uploader_id);
 create policy "Users create materials" on public.materials for insert with check (auth.uid() = uploader_id);
 create policy "Users edit own materials" on public.materials for update using (auth.uid() = uploader_id);
 create policy "Users delete own materials" on public.materials for delete using (auth.uid() = uploader_id);
@@ -79,3 +80,4 @@ set username = 'student_' || right(replace(id::text, '-', ''), 6)
 where username is null or username = '';
 alter table public.profiles alter column username set not null;
 create unique index if not exists profiles_username_key on public.profiles (username);
+alter table public.materials add column if not exists is_public boolean not null default true;
