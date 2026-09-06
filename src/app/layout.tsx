@@ -8,6 +8,10 @@ const jakarta = Plus_Jakarta_Sans({ variable: "--font-plus-jakarta", subsets: ["
 export const metadata: Metadata = {
   title: "drive. — Share. Learn. Succeed together.",
   description: "A shared study shelf for college students.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
