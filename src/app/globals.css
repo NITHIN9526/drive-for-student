@@ -1,26 +1,25 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+:root { --background: #fbfbfd; --foreground: #0f172a; }
+.dark { --background: #0f172a; --foreground: #e2e8f0; color-scheme: dark; }
+@theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --font-sans: var(--font-inter); --font-display: var(--font-plus-jakarta); }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--background); color: var(--foreground); font-family: Arial, Helvetica, sans-serif; transition: background-color .2s ease, color .2s ease; }
+.dark body { background: #0f172a; color: #e2e8f0; }
+.dark .bg-white { background-color: #182235; }
+.dark .bg-\[\#fbfbfd\], .dark .bg-\[\#f7f8fc\] { background-color: #0f172a; }
+.dark .border-slate-100, .dark .border-slate-200 { border-color: #2b3950; }
+.dark .text-slate-900, .dark .text-slate-950, .dark .text-slate-800, .dark .text-slate-700 { color: #e2e8f0; }
+.dark .text-slate-600, .dark .text-slate-500 { color: #a8b5c8; }
+.dark .text-slate-400 { color: #8291a7; }
+.dark .bg-slate-50 { background-color: #202d42; }
+.dark .bg-slate-200\/60 { background-color: #202d42; }
+.theme-toggle { display: grid; height: 40px; width: 40px; place-items: center; border: 1px solid #e2e8f0; border-radius: 12px; color: #64748b; transition: background-color .2s ease, color .2s ease; }
+.theme-toggle:hover { background: #f1f5f9; color: #4f46e5; }
+.dark .theme-toggle { border-color: #334155; color: #fbbf24; }
+.dark .theme-toggle:hover { background: #202d42; }
+.font-display { font-family: var(--font-plus-jakarta), Arial, sans-serif; }
+.avatar { display: grid; height: 28px; width: 28px; place-items: center; border: 2px solid white; border-radius: 999px; font-size: 9px; font-weight: 800; color: #475569; }
+.material-card { display: flex; align-items: center; gap: 12px; border-radius: 14px; background: white; padding: 13px; box-shadow: 0 1px 4px rgb(15 23 42 / 0.04); }
+.icon-box { display: grid; height: 36px; width: 36px; flex: none; place-items: center; border-radius: 10px; }
